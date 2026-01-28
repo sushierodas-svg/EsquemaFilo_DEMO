@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escolaris - Activity Investigation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --naranja: #db6015;
+            --amarillo: #f7be00;
+            --azul-oscuro: #244b5a;
+            --rojo-ladrillo: #993921;
+            --azul-claro: #f0f8ff;
+            --blanco: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--azul-claro) 0%, var(--blanco) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--azul-oscuro);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Language Selector */
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: 2px solid var(--naranja);
+            background-color: var(--blanco);
+            color: var(--naranja);
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background-color: var(--naranja);
+            color: var(--blanco);
+        }
+
+        .lang-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(219, 96, 21, 0.3);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--azul-oscuro) 0%, #1a3447 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(36, 75, 90, 0.15);
+        }
+
+        .header-content h1 {
+            color: var(--amarillo);
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header-content p {
+            color: var(--blanco);
+            font-size: 1.1em;
+        }
+
+        .logo-escolaris {
+            color: var(--amarillo);
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        /* Main Content */
+        .activity-section {
+            background-color: var(--blanco);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .activity-title {
+            color: var(--azul-oscuro);
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .activity-title span {
+            color: var(--amarillo);
+        }
+
+        .instructions {
+            background-color: var(--azul-claro);
+            padding: 20px;
+            border-left: 4px solid var(--naranja);
+            border-radius: 8px;
+            margin-bottom: 30px;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        /* Science Selector */
+        .science-section {
+            margin-bottom: 40px;
+        }
+
+        .science-label {
+            display: block;
+            font-weight: bold;
+            color: var(--azul-oscuro);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .science-select {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px;
+            border: 3px solid var(--naranja);
+            border-radius: 8px;
+            font-size: 1em;
+            background-color: var(--blanco);
+            color: var(--azul-oscuro);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .science-select:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(219, 96, 21, 0.2);
+        }
+
+        /* Esquema */
+        .esquema {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .titulo-section {
+            width: 100%;
+            text-align: center;
+        }
+
+        .titulo-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px;
+            border: 3px solid var(--naranja);
+            border-radius: 50px;
+            font-size: 1.1em;
+            text-align: center;
+            background-color: #fafafa;
+            color: var(--azul-oscuro);
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .titulo-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(219, 96, 21, 0.2);
+            background-color: var(--blanco);
+        }
+
+        /* Idea Principal */
+        .idea-box {
+            background: linear-gradient(135deg, var(--azul-claro) 0%, rgba(240, 248, 255, 0.5) 100%);
+            border: 3px solid var(--naranja);
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .idea-label {
+            font-weight: bold;
+            color: var(--azul-oscuro);
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .idea-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--amarillo);
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 25px;
+            background-color: var(--blanco);
+            color: var(--azul-oscuro);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .idea-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(247, 190, 0, 0.2);
+        }
+
+        .secondary-ideas {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .secondary-box {
+            background-color: #fafafa;
+            border-left: 4px solid var(--rojo-ladrillo);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .secondary-label {
+            font-weight: bold;
+            color: var(--rojo-ladrillo);
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .secondary-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--rojo-ladrillo);
+            border-radius: 6px;
+            font-size: 0.95em;
+            background-color: var(--blanco);
+            color: var(--azul-oscuro);
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .secondary-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(153, 57, 33, 0.15);
+        }
+
+        .details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .detail-label {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .detail-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+            background-color: #f9f9f9;
+            color: var(--azul-oscuro);
+            transition: all 0.3s ease;
+        }
+
+        .detail-input:focus {
+            outline: none;
+            background-color: var(--blanco);
+            border-color: var(--naranja);
+            box-shadow: 0 0 0 2px rgba(219, 96, 21, 0.1);
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--naranja) 0%, #c2531c 100%);
+            color: var(--blanco);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(219, 96, 21, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--azul-oscuro);
+            color: var(--blanco);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(36, 75, 90, 0.3);
+        }
+
+        /* Messages */
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--azul-oscuro);
+            font-size: 0.9em;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .header-content h1 {
+                font-size: 1.8em;
+            }
+
+            .activity-section {
+                padding: 20px;
+            }
+
+            .activity-title {
+                font-size: 1.5em;
+            }
+
+            .language-selector {
+                position: static;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="language-selector">
+        <button class="lang-btn active" onclick="changeLanguage('en')">EN</button>
+        <button class="lang-btn" onclick="changeLanguage('es')">ES</button>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <h1 id="header-title">TASK / INVESTIGATION</h1>
+                <p id="header-subtitle">Escolaris - Education to Transcend</p>
+            </div>
+            <div class="logo-escolaris">📚</div>
+        </div>
+
+        <div class="activity-section">
+            <h2 class="activity-title" id="activity-title">SCIENCES RELATED TO <span>PHILOSOPHY</span></h2>
+
+            <div class="instructions" id="instructions-box">
+                <p id="instruction-text">Select a science related to philosophy and complete the diagram. Be organized and use good spelling.</p>
+                <p id="instruction-text-2" style="margin-top: 10px;">Available sciences: Ethics, Aesthetics, Epistemology, Logic, Metaphysics</p>
+            </div>
+
+            <!-- Science Selection -->
+            <div class="science-section">
+                <label class="science-label" id="science-label">Select a Science:</label>
+                <select class="science-select" id="science-select">
+                    <option value="">-- Choose one --</option>
+                    <option value="Ethics">Ethics</option>
+                    <option value="Aesthetics">Aesthetics</option>
+                    <option value="Epistemology">Epistemology</option>
+                    <option value="Logic">Logic</option>
+                    <option value="Metaphysics">Metaphysics</option>
+                </select>
+            </div>
+
+            <div class="esquema">
+                <!-- Main Idea -->
+                <div class="idea-box">
+                    <label class="idea-label" id="main-idea-label">Main Idea</label>
+                    <input 
+                        type="text" 
+                        class="idea-input" 
+                        id="main-idea"
+                        placeholder="Write your main idea"
+                        onpaste="return false"
+                        oncopy="return false"
+                        oncut="return false"
+                        ondragstart="return false"
+                        ondrop="return false"
+                    >
+
+                    <!-- Secondary Ideas -->
+                    <div class="secondary-ideas">
+                        <div class="secondary-box">
+                            <label class="secondary-label" id="sec1-label">Secondary Idea 1</label>
+                            <input 
+                                type="text" 
+                                class="secondary-input" 
+                                id="sec1"
+                                placeholder="Write your secondary idea"
+                                onpaste="return false"
+                                oncopy="return false"
+                                oncut="return false"
+                                ondragstart="return false"
+                                ondrop="return false"
+                            >
+                            <div class="details">
+                                <label class="detail-label" id="det1-1-label">Detail 1:</label>
+                                <input 
+                                    type="text" 
+                                    class="detail-input" 
+                                    id="det1_1"
+                                    placeholder="Add detail"
+                                    onpaste="return false"
+                                    oncopy="return false"
+                                    oncut="return false"
+                                    ondragstart="return false"
+                                    ondrop="return false"
+                                >
+                                <label class="detail-label" id="det1-2-label">Detail 2:</label>
+                                <input 
+                                    type="text" 
+                                    class="detail-input" 
+                                    id="det1_2"
+                                    placeholder="Add detail"
+                                    onpaste="return false"
+                                    oncopy="return false"
+                                    oncut="return false"
+                                    ondragstart="return false"
+                                    ondrop="return false"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="secondary-box">
+                            <label class="secondary-label" id="sec2-label">Secondary Idea 2</label>
+                            <input 
+                                type="text" 
+                                class="secondary-input" 
+                                id="sec2"
+                                placeholder="Write your secondary idea"
+                                onpaste="return false"
+                                oncopy="return false"
+                                oncut="return false"
+                                ondragstart="return false"
+                                ondrop="return false"
+                            >
+                            <div class="details">
+                                <label class="detail-label" id="det2-1-label">Detail 1:</label>
+                                <input 
+                                    type="text" 
+                                    class="detail-input" 
+                                    id="det2_1"
+                                    placeholder="Add detail"
+                                    onpaste="return false"
+                                    oncopy="return false"
+                                    oncut="return false"
+                                    ondragstart="return false"
+                                    ondrop="return false"
+                                >
+                                <label class="detail-label" id="det2-2-label">Detail 2:</label>
+                                <input 
+                                    type="text" 
+                                    class="detail-input" 
+                                    id="det2_2"
+                                    placeholder="Add detail"
+                                    onpaste="return false"
+                                    oncopy="return false"
+                                    oncut="return false"
+                                    ondragstart="return false"
+                                    ondrop="return false"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="guardarActividad()" id="save-btn">Save Activity</button>
+                <button class="btn btn-primary" onclick="descargarPDF()" id="download-pdf-btn" style="background: linear-gradient(135deg, #f7be00 0%, #e0a800 100%); color: var(--azul-oscuro);">Download PDF</button>
+                <button class="btn btn-secondary" onclick="limpiarActividad()" id="clear-btn">Clear</button>
+            </div>
+
+            <!-- Message -->
+            <div id="mensaje" class="message"></div>
+        </div>
+
+        <div class="footer">
+            <p id="footer-text">© 2026 Escolaris - Education to Transcend</p>
+        </div>
+    </div>
+
+    <script>
+        // Translations
+        const textos = {
+            en: {
+                'header-title': 'TASK / INVESTIGATION',
+                'header-subtitle': 'Escolaris - Education to Transcend',
+                'activity-title': 'SCIENCES RELATED TO PHILOSOPHY',
+                'activity-title-span': 'PHILOSOPHY',
+                'instruction-text': 'Select a science related to philosophy and complete the diagram. Be organized and use good spelling.',
+                'instruction-text-2': 'Available sciences: Ethics, Aesthetics, Epistemology, Logic, Metaphysics',
+                'science-label': 'Select a Science:',
+                'main-idea-label': 'Main Idea',
+                'sec1-label': 'Secondary Idea 1',
+                'sec2-label': 'Secondary Idea 2',
+                'det1-1-label': 'Detail 1:',
+                'det1-2-label': 'Detail 2:',
+                'det2-1-label': 'Detail 1:',
+                'det2-2-label': 'Detail 2:',
+                'save-btn': 'Save Activity',
+                'download-pdf-btn': 'Download PDF',
+                'clear-btn': 'Clear',
+                'save-success': 'Activity saved successfully!',
+                'download-success': 'PDF downloaded! You can share it with your teacher.',
+                'footer-text': '© 2026 Escolaris - Education to Transcend'
+            },
+            es: {
+                'header-title': 'TAREA / INVESTIGACIÓN',
+                'header-subtitle': 'Escolaris - Educación para trascender',
+                'activity-title': 'CIENCIAS RELACIONADAS CON LA FILOSOFÍA',
+                'activity-title-span': 'FILOSOFÍA',
+                'instruction-text': 'Selecciona una ciencia relacionada con la filosofía y completa el esquema. Sea ordenado y use buena ortografía.',
+                'instruction-text-2': 'Ciencias disponibles: Ética, Estética, Epistemología, Lógica, Metafísica',
+                'science-label': 'Selecciona una Ciencia:',
+                'main-idea-label': 'Idea Principal',
+                'sec1-label': 'Idea Secundaria 1',
+                'sec2-label': 'Idea Secundaria 2',
+                'det1-1-label': 'Detalle 1:',
+                'det1-2-label': 'Detalle 2:',
+                'det2-1-label': 'Detalle 1:',
+                'det2-2-label': 'Detalle 2:',
+                'save-btn': 'Guardar Actividad',
+                'download-pdf-btn': 'Descargar PDF',
+                'clear-btn': 'Limpiar',
+                'save-success': '¡Actividad guardada exitosamente!',
+                'download-success': '¡PDF descargado! Puedes compartirlo con tu maestra.',
+                'footer-text': '© 2026 Escolaris - Educación para trascender'
+            }
+        };
+
+        let idioma = 'en';
+
+        function changeLanguage(lang) {
+            idioma = lang;
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            actualizarTextos();
+        }
+
+        function actualizarTextos() {
+            const t = textos[idioma];
+
+            document.getElementById('header-title').textContent = t['header-title'];
+            document.getElementById('header-subtitle').textContent = t['header-subtitle'];
+            
+            const titleEl = document.getElementById('activity-title');
+            const titleSpan = (idioma === 'es' ? 'CIENCIAS RELACIONADAS CON LA ' : 'SCIENCES RELATED TO ');
+            titleEl.innerHTML = titleSpan + `<span>${t['activity-title-span']}</span>`;
+            
+            document.getElementById('instruction-text').textContent = t['instruction-text'];
+            document.getElementById('instruction-text-2').textContent = t['instruction-text-2'];
+            document.getElementById('science-label').textContent = t['science-label'];
+
+            document.getElementById('main-idea-label').textContent = t['main-idea-label'];
+            document.getElementById('sec1-label').textContent = t['sec1-label'];
+            document.getElementById('sec2-label').textContent = t['sec2-label'];
+
+            document.getElementById('det1-1-label').textContent = t['det1-1-label'];
+            document.getElementById('det1-2-label').textContent = t['det1-2-label'];
+            document.getElementById('det2-1-label').textContent = t['det2-1-label'];
+            document.getElementById('det2-2-label').textContent = t['det2-2-label'];
+
+            document.getElementById('save-btn').textContent = t['save-btn'];
+            document.getElementById('download-pdf-btn').textContent = t['download-pdf-btn'];
+            document.getElementById('clear-btn').textContent = t['clear-btn'];
+            document.getElementById('footer-text').textContent = t['footer-text'];
+
+            // Update select options
+            actualizarSelectOpciones();
+        }
+
+        function actualizarSelectOpciones() {
+            const select = document.getElementById('science-select');
+            const optionTexts = {
+                'en': {
+                    '': '-- Choose one --',
+                    'Ethics': 'Ethics',
+                    'Aesthetics': 'Aesthetics',
+                    'Epistemology': 'Epistemology',
+                    'Logic': 'Logic',
+                    'Metaphysics': 'Metaphysics'
+                },
+                'es': {
+                    '': '-- Elige una --',
+                    'Ethics': 'Ética',
+                    'Aesthetics': 'Estética',
+                    'Epistemology': 'Epistemología',
+                    'Logic': 'Lógica',
+                    'Metaphysics': 'Metafísica'
+                }
+            };
+
+            const options = select.getElementsByTagName('option');
+            
+            options[0].textContent = optionTexts[idioma][''];
+            options[1].textContent = optionTexts[idioma]['Ethics'];
+            options[2].textContent = optionTexts[idioma]['Aesthetics'];
+            options[3].textContent = optionTexts[idioma]['Epistemology'];
+            options[4].textContent = optionTexts[idioma]['Logic'];
+            options[5].textContent = optionTexts[idioma]['Metaphysics'];
+        }
+
+        function guardarActividad() {
+            const datos = {
+                science: document.getElementById('science-select').value,
+                mainIdea: document.getElementById('main-idea').value,
+                sec1: document.getElementById('sec1').value,
+                det1_1: document.getElementById('det1_1').value,
+                det1_2: document.getElementById('det1_2').value,
+                sec2: document.getElementById('sec2').value,
+                det2_1: document.getElementById('det2_1').value,
+                det2_2: document.getElementById('det2_2').value
+            };
+
+            localStorage.setItem('actividad_esquema', JSON.stringify(datos));
+
+            const mensaje = document.getElementById('mensaje');
+            mensaje.textContent = textos[idioma]['save-success'];
+            mensaje.className = 'message success';
+
+            setTimeout(() => {
+                mensaje.className = 'message';
+            }, 3000);
+        }
+
+        function descargarPDF() {
+            const ciencia = document.getElementById('science-select').value || 'Science';
+            const datos = {
+                science: ciencia,
+                mainIdea: document.getElementById('main-idea').value,
+                sec1: document.getElementById('sec1').value,
+                det1_1: document.getElementById('det1_1').value,
+                det1_2: document.getElementById('det1_2').value,
+                sec2: document.getElementById('sec2').value,
+                det2_1: document.getElementById('det2_1').value,
+                det2_2: document.getElementById('det2_2').value
+            };
+
+            const tempDiv = document.createElement('div');
+            tempDiv.style.width = '800px';
+            tempDiv.style.padding = '20px';
+            tempDiv.style.backgroundColor = 'white';
+            tempDiv.style.fontFamily = 'Arial, sans-serif';
+            tempDiv.style.color = '#244b5a';
+            tempDiv.style.lineHeight = '1.6';
+
+            let html = `
+                <div style="border-bottom: 4px solid #db6015; margin-bottom: 30px; padding-bottom: 20px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #db6015; margin-bottom: 10px;">📚 ESCOLARIS</div>
+                    <h1 style="color: #244b5a; font-size: 28px; margin: 0;">INVESTIGATION DIAGRAM</h1>
+                    <div style="color: #f7be00; font-size: 18px; margin-top: 5px;">Sciences Related to Philosophy</div>
+                </div>
+
+                <div style="background-color: #f0f8ff; padding: 20px; border-left: 4px solid #f7be00; margin: 30px 0; border-radius: 5px;">
+                    <div style="font-weight: bold; color: #244b5a; font-size: 14px;">Science:</div>
+                    <div style="font-size: 22px; color: #db6015; font-weight: bold; margin-top: 10px;">${escapeHtml(datos.science)}</div>
+                </div>
+
+                <div style="background-color: #f0f8ff; border-left: 4px solid #db6015; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                    <div style="font-size: 16px; font-weight: bold; color: #db6015; margin-bottom: 10px;">Main Idea</div>
+                    <div style="font-size: 14px; color: #244b5a; margin-bottom: 20px; padding: 10px; background-color: white; border-radius: 3px;">
+                        ${escapeHtml(datos.mainIdea) || '<em>Not completed</em>'}
+                    </div>
+
+                    <div style="margin-left: 0;">
+                        <div style="background-color: #fff; border-left: 3px solid #993921; padding: 10px 15px; margin: 10px 0; border-radius: 3px;">
+                            <div style="font-size: 13px; font-weight: bold; color: #993921; margin-bottom: 8px;">Secondary Idea 1</div>
+                            <div style="font-size: 12px; color: #244b5a; background-color: #fafafa; padding: 8px; margin-bottom: 8px; border-radius: 3px;">
+                                ${escapeHtml(datos.sec1) || '<em>Not completed</em>'}
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin: 5px 0; padding: 6px; background-color: #f9f9f9; border-left: 2px solid #ddd; padding-left: 10px;">
+                                <strong>Detail 1:</strong> ${escapeHtml(datos.det1_1) || '<em>Not completed</em>'}
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin: 5px 0; padding: 6px; background-color: #f9f9f9; border-left: 2px solid #ddd; padding-left: 10px;">
+                                <strong>Detail 2:</strong> ${escapeHtml(datos.det1_2) || '<em>Not completed</em>'}
+                            </div>
+                        </div>
+
+                        <div style="background-color: #fff; border-left: 3px solid #993921; padding: 10px 15px; margin: 10px 0; border-radius: 3px;">
+                            <div style="font-size: 13px; font-weight: bold; color: #993921; margin-bottom: 8px;">Secondary Idea 2</div>
+                            <div style="font-size: 12px; color: #244b5a; background-color: #fafafa; padding: 8px; margin-bottom: 8px; border-radius: 3px;">
+                                ${escapeHtml(datos.sec2) || '<em>Not completed</em>'}
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin: 5px 0; padding: 6px; background-color: #f9f9f9; border-left: 2px solid #ddd; padding-left: 10px;">
+                                <strong>Detail 1:</strong> ${escapeHtml(datos.det2_1) || '<em>Not completed</em>'}
+                            </div>
+                            <div style="font-size: 11px; color: #666; margin: 5px 0; padding: 6px; background-color: #f9f9f9; border-left: 2px solid #ddd; padding-left: 10px;">
+                                <strong>Detail 2:</strong> ${escapeHtml(datos.det2_2) || '<em>Not completed</em>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align: right; font-size: 11px; color: #999; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd;">
+                    Date: ${new Date().toLocaleString(idioma === 'es' ? 'es-ES' : 'en-US')}
+                </div>
+
+                <div style="text-align: center; font-size: 12px; color: #db6015; margin-top: 30px; font-weight: bold;">
+                    Escolaris - Education to Transcend
+                </div>
+            `;
+
+            tempDiv.innerHTML = html;
+            document.body.appendChild(tempDiv);
+
+            html2canvas(tempDiv, {
+                scale: 2,
+                logging: false,
+                useCORS: true,
+                backgroundColor: '#ffffff'
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'letter'
+                });
+
+                const imgWidth = 203;
+                const pageHeight = 250;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 3.5, position + 10, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 3.5, position + 10, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save(`Activity_${datos.science}_${new Date().getTime()}.pdf`);
+                document.body.removeChild(tempDiv);
+
+                const mensaje = document.getElementById('mensaje');
+                mensaje.textContent = textos[idioma]['download-success'];
+                mensaje.className = 'message success';
+
+                setTimeout(() => {
+                    mensaje.className = 'message';
+                }, 3000);
+            }).catch(err => {
+                console.error('Error:', err);
+                document.body.removeChild(tempDiv);
+            });
+        }
+
+        function limpiarActividad() {
+            if (confirm(idioma === 'es' ? '¿Estás seguro de que deseas limpiar todos los campos?' : 'Are you sure you want to clear all fields?')) {
+                document.querySelectorAll('input[type="text"]').forEach(input => {
+                    input.value = '';
+                });
+                document.getElementById('science-select').value = '';
+                localStorage.removeItem('actividad_esquema');
+            }
+        }
+
+        window.addEventListener('load', function() {
+            const datosGuardados = localStorage.getItem('actividad_esquema');
+            if (datosGuardados) {
+                const datos = JSON.parse(datosGuardados);
+                document.getElementById('science-select').value = datos.science;
+                document.getElementById('main-idea').value = datos.mainIdea;
+                document.getElementById('sec1').value = datos.sec1;
+                document.getElementById('det1_1').value = datos.det1_1;
+                document.getElementById('det1_2').value = datos.det1_2;
+                document.getElementById('sec2').value = datos.sec2;
+                document.getElementById('det2_1').value = datos.det2_1;
+                document.getElementById('det2_2').value = datos.det2_2;
+            }
+            actualizarTextos();
+        });
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            return false;
+        });
+
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            return false;
+        });
+    </script>
+</body>
+</html>
